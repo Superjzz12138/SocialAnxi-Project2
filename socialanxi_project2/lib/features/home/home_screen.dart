@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../room/room_model.dart';
+import '../room/room_lobby_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController roomNameController = TextEditingController();
+  final TextEditingController joinRoomIdController = TextEditingController();
 
   Future<void> createRoom() async {
     final String roomName = roomNameController.text.trim();
@@ -46,6 +48,48 @@ class _HomeScreenState extends State<HomeScreen> {
     roomNameController.clear();
       
   }
+
+void joinRoom() {
+  showDialog(context: context, 
+  builder: (context) => AlertDialog(
+    title: const Text('Join Room'),
+    content: TextField(
+      controller: joinRoomIdController,
+      decoration: const InputDecoration(labelText: 'Enter Room ID'),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context,), 
+        child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+            final roomId = joinRoomIdController.text.trim();
+            if (roomId.isEmpty) return;
+            
+            final roomDoc = await FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(roomId)
+            .get();
+
+            if (roomDoc.exists) {
+              Navigator.pop(context);
+              Navigator.push(context,
+              MaterialPageRoute(
+                builder: (_) => RoomLobbyScreen(roomId: roomId),),);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Room ID not found!')),
+              );
+            }
+          }, child: const Text('Join')),
+    ],
+  ));
+}
+
+
+
+
     @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             const SizedBox(height: 40),
-            const Text('My Rooms', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const Text('Available Rooms', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
 
 
             // Show list of rooms
@@ -127,9 +171,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         subtitle: Text('Host: ${roomData['hostId'].substring(0, 8)}...'),
                         trailing: const Icon(Icons.arrow_forward),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Join room coming soon...')),
-                          );
+                          Navigator.push(
+                            context, 
+                            MaterialPageRoute(
+                              builder: (_) => RoomLobbyScreen(
+                                roomId: roomData['roomId'])),);
                         },
                       );
                     },
@@ -143,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  
+
   @override
   void dispose() {
     roomNameController.dispose();
