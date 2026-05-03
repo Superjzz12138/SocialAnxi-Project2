@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933833543524",
+    "project_id": "fb-final-project-8bcfe",
+    "storage_bucket": "fb-final-project-8bcfe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933833543524:android:f7a56defee2ca8452a3471",
+        "android_client_info": {
+          "package_name": "com.example.socialanxi_project2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9zZJlZnd6CEknEo0jaalaRrK34qtfZb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
