@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../room/room_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -8,12 +11,55 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  @override
+  final TextEditingController roomNameController = TextEditingController();
+
+  Future<void> createRoom() async {
+    final String roomName = roomNameController.text.trim();
+    if (roomName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter room name')),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final String roomId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final newRoom = Room(
+      roomId: roomId, 
+      roomName: roomName, 
+      hostId: user.uid, 
+      createdAt: DateTime.now()
+    );
+
+    await FirebaseFirestore.instance
+    .collection('rooms')
+    .doc(roomId)
+    .set(newRoom.toMap());
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Room"$roomName" created!')),
+    );
+
+    roomNameController.clear();
+      
+  }
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Vibzcheck'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              // TODO: User Profile
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -24,37 +70,71 @@ class _HomeScreenState extends State<HomeScreen> {
               'Welcome to Vibzcheck',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 40),
+            const Text(
+              'Chill with your friends in the music world~~',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 60),
 
-            // Create Room Button
+
+            // Create Room Section
+            TextField(
+              controller: roomNameController,
+              decoration: const InputDecoration(
+                labelText: 'Room Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Create room later
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Create Room coming soon...')),
-                  );
-                },
-                child: const Text('Create New Room', style: TextStyle(fontSize: 18)),
+                onPressed: createRoom,
+                child: const Text('Create New Room',style: TextStyle(fontSize: 18)),
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 40),
+            const Text('My Rooms', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
 
-            // Join Room Button
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: OutlinedButton(
-                onPressed: () {
-                  // TODO: Join room later
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Join Room coming soon...')),
+
+            // Show list of rooms
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('rooms')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final rooms = snapshot.data!.docs;
+
+                  if (rooms.isEmpty) {
+                    return const Center(child: Text('No rooms yet'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: rooms.length,
+                    itemBuilder: (context, index) {
+                      final roomData = rooms[index].data() as Map<String, dynamic>;
+                      return ListTile(
+                        title: Text(roomData['roomName'] ?? 'Unnamed Room'),
+                        subtitle: Text('Host: ${roomData['hostId'].substring(0, 8)}...'),
+                        trailing: const Icon(Icons.arrow_forward),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Join room coming soon...')),
+                          );
+                        },
+                      );
+                    },
                   );
                 },
-                child: const Text('Join Existing Room', style: TextStyle(fontSize: 18)),
               ),
             ),
           ],
@@ -62,4 +142,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  
+  @override
+  void dispose() {
+    roomNameController.dispose();
+    super.dispose();
+  }
+
+
 }
