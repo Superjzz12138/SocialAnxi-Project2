@@ -28,11 +28,11 @@ class Song {
 
   factory Song.fromMap(Map<String, dynamic> map) {
     return Song(
-      id: map['id'],
-      title: map['title'],
-      artist: map['artist'],
-      coverUrl: map['coverUrl'],
-      audioUrl: map['audioUrl'],
+      id: map['id'] ?? '',
+      title: map['title'] ?? '',
+      artist: map['artist'] ?? '',
+      coverUrl: map['coverUrl'] ?? 'https://picsum.photos/200',
+      audioUrl: map['audioUrl'] ?? '',
       voteCount: map['voteCount'] ?? 0,
     );
   }
