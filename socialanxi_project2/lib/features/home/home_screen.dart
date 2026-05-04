@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:socialanxi_project2/features/profile/profile_screen.dart';
+import 'package:socialanxi_project2/features/recommendation/recommendation_screen.dart';
 import '../room/room_model.dart';
 import '../room/room_lobby_screen.dart';
 
@@ -115,12 +116,20 @@ void joinRoom() {
               'Welcome to Vibzcheck',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
+
             const SizedBox(height: 40),
-            const Text(
-              'Chill with your friends in the music world~~',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+
+            SizedBox(
+              height: 30,
+              width: 250,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(context, 
+                  MaterialPageRoute(builder: (_) => const RecommendationScreen()),);
+                }, 
+                child: const Text('Music Recommendations')),
             ),
+
             const SizedBox(height: 60),
 
 
