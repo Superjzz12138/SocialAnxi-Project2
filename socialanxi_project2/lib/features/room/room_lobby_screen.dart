@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../queue/song_model.dart';
 import '../chat/message_model.dart';
+import '../player/music_player_screen.dart';
 
 class RoomLobbyScreen extends StatefulWidget {
   final String roomId;
@@ -16,6 +17,8 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
   final TextEditingController songTitleController = TextEditingController();
   final TextEditingController artistController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
+  
+  List<Song> currentQueue = [];
 
   Future<void> addSong() async {
     final title = songTitleController.text.trim();
@@ -80,10 +83,28 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
     .update({'voteCount': currentVotes + 1});
   }
 
+  void openPlayer() {
+    if (currentQueue.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No songs in queue yet')),
+      );
+      return;
+    }
+
+    Navigator.push(context, MaterialPageRoute(builder: (_) => MusicPlayerScreen(queue: currentQueue)),);
+    return;
+  }
+
 @override
 Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Room: ${widget.roomId}')),
+      appBar: AppBar(
+        title: Text('Room: ${widget.roomId}'),
+        actions: [
+          IconButton(
+            onPressed: openPlayer, 
+            icon: const Icon(Icons.play_arrow)),
+        ],),
       body: Column(
         children: [
           // Music Queue Section (Merged Add Song)
@@ -135,6 +156,13 @@ Widget build(BuildContext context) {
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator());
+                      }
+                      currentQueue =snapshot.data!.docs.map((doc) {
+                        return Song.fromMap(doc.data() as Map<String, dynamic>);
+                      }).toList();
+
+                      if (currentQueue.isEmpty) {
+                        return const Center(child: Text('No songs yet'),);
                       }
 
                       final songs = snapshot.data!.docs.map((doc) {

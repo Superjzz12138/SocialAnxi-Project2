@@ -90,7 +90,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
             ),
             Text(
               currentSong?.artist ?? '',
-              style: const TextStyle(fontSize: 18, color: Colors.black),
+              style: const TextStyle(fontSize: 18, color: Colors.white),
             ),
             const SizedBox(height: 40,),
 
@@ -114,7 +114,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
             ),
 
             const SizedBox(height: 20,),
-            const Text('Audio Playing', style: TextStyle(color: Colors.black),),
+            const Text('Audio Playing', style: TextStyle(color: Colors.white),),
           ],
         ),
 
