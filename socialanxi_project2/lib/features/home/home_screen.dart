@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:socialanxi_project2/features/profile/profile_screen.dart';
 import '../room/room_model.dart';
 import '../room/room_lobby_screen.dart';
 
@@ -100,7 +101,7 @@ void joinRoom() {
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              // TODO: User Profile
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()),);
             },
           ),
         ],
