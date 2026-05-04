@@ -71,6 +71,15 @@ class _RoomLobbyScreenState extends State<RoomLobbyScreen> {
       messageController.clear();
   }
 
+  Future<void> voteForSong(String songId, int currentVotes) async {
+    await FirebaseFirestore.instance
+    .collection('rooms')
+    .doc(widget.roomId)
+    .collection('queue')
+    .doc(songId)
+    .update({'voteCount': currentVotes + 1});
+  }
+
 @override
 Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +124,7 @@ Widget build(BuildContext context) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Current Queue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('Current Queue (Vote for next song)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
@@ -144,7 +153,15 @@ Widget build(BuildContext context) {
                             leading: const Icon(Icons.music_note),
                             title: Text(song.title),
                             subtitle: Text(song.artist),
-                            trailing: Text('${song.voteCount} votes'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('${song.voteCount}'),
+                                IconButton(
+                                  onPressed: () => voteForSong(song.id, song.voteCount), 
+                                  icon: const Icon(Icons.thumb_up, color: Colors.green),),
+                              ],
+                            )
                           );
                         },
                       );
